@@ -3,6 +3,8 @@ from typing import Callable, List, Union
 import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
+from keter.actors.vectors import ChemicalLanguage
+from keter.stage import FileSystemStage
 
 
 Molecule = Union[str, Chem.Mol]
@@ -153,3 +155,11 @@ def custom_features_generator(mol: Molecule) -> np.ndarray:
 
     return features
 """
+with FileSystemStage():
+    _lang_doc2vec = ChemicalLanguage(mode="doc2vec")
+
+    @register_features_generator("doc2vec")
+    def doc2vec_features_generator(mol: Molecule) -> np.ndarray:
+        smiles = Chem.MolToSmiles(mol, isomericSmiles=True) if type(mol) != str else mol
+
+        return _lang_doc2vec.transform([smiles])[0]
